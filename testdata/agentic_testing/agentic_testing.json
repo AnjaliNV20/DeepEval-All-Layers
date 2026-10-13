@@ -1,0 +1,46 @@
+{
+  "TC_SC3_TOOL_CORRECTNESS": {
+    "prompt": "Search the product catalog for a Samsung Galaxy S25 and retrieve the available product details.",
+    "expected_response": "The assistant should search the product catalog for a Samsung Galaxy S25 and retrieve the relevant product details.",
+    "scenario": "Search and discover a Samsung Galaxy S25 from the e-commerce product catalog.",
+
+    "expected_tools": [
+      {
+        "name": "search_samsung_catalog",
+        "input_parameters": {
+          "query": "Samsung Galaxy S25"
+        }
+      }
+    ],
+
+    "task_completion": {
+      "expected": "The assistant should successfully search the product catalog and return the available iPhone 16 product details."
+    },
+
+    "metrics": [
+      "Tool Correctness",
+      "Task Completion",
+      "Argument Correctness"
+    ]
+  },
+
+  "TC_SC3_PLAN_ADHERENCE": {
+    "prompt": "I want to buy an iPhone 16. Show me the available colors and price, then place the order to my saved address.",
+    "expected_response": "The assistant should follow the customer journey by retrieving the iPhone 16 colors and price, then using the saved address to place the order.",
+    "scenario": "Compare iPhone 16 options, decide on a product, and place the order using a saved address.",
+
+    "metrics": [
+      "Plan Adherence"
+    ]
+  },
+
+  "TC_SC3_PLAN_QUALITY": {
+    "prompt": "Create a logical plan for buying an iPhone 16 from the e-commerce order assistant, starting with product search, then checking available colors and price, placing the order to the saved address, and finally tracking the order.",
+    "expected_response": "The assistant should create a logical and complete customer journey covering iPhone 16 search, color and price comparison, order placement using the saved address, and order tracking.",
+    "scenario": "Complete e-commerce customer journey for an iPhone 16 from product discovery through order fulfillment.",
+
+    "metrics": [
+      "Plan Quality"
+    ]
+  }
+}

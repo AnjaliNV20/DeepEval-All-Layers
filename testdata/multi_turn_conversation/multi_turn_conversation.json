@@ -1,0 +1,61 @@
+{
+  "TC_SC2_P1": {
+    "prompt": "I want to automate OrangeHRM login page using Playwright TypeScript.",
+    "expected_response": "The assistant should understand that the user wants to automate the OrangeHRM login page using Playwright TypeScript.",
+    "scenario": "OrangeHRM login automation using Playwright TypeScript.",
+    "llm_metrics": [
+      "Faithfulness"
+    ],
+    "ui_metrics": [
+      "Conversation Relevancy"
+    ]
+  },
+
+  "TC_SC2_P2": {
+    "prompt": "Create Page Object for it.",
+    "expected_response": "The assistant should create or explain a Page Object for the OrangeHRM login page and retain the previous automation context.",
+    "scenario": "OrangeHRM login automation using Playwright TypeScript and Page Object Model.",
+    "llm_metrics": [
+      "Faithfulness"
+    ],
+    "ui_metrics": [
+      "Conversation Relevancy"
+    ]
+  },
+
+  "TC_SC2_P3": {
+    "prompt": "Now create test script using the Page Object.",
+    "expected_response": "The assistant should create or explain a Playwright TypeScript test script using the previously discussed OrangeHRM login Page Object.",
+    "scenario": "OrangeHRM login automation with Page Object and Playwright TypeScript test script.",
+    "llm_metrics": [
+      "Faithfulness"
+    ],
+    "ui_metrics": [
+      "Conversation Relevancy"
+    ]
+  },
+
+  "TC_SC2_P4": {
+    "prompt": "Add API validation after login.",
+    "expected_response": "The assistant should add or explain API validation after the OrangeHRM login flow while retaining the existing automation context.",
+    "scenario": "OrangeHRM login automation with Page Object, test script and API validation.",
+    "llm_metrics": [
+      "Faithfulness"
+    ],
+    "ui_metrics": [
+      "Conversation Relevancy"
+    ]
+  },
+
+  "TC_SC2_P5": {
+    "prompt": "Integrate this into GitHub Actions CI/CD.",
+    "expected_response": "The assistant should explain or provide GitHub Actions CI/CD integration for the existing OrangeHRM Playwright TypeScript automation with API validation.",
+    "scenario": "OrangeHRM Playwright TypeScript automation integrated with GitHub Actions CI/CD.",
+    "llm_metrics": [
+      "Faithfulness"
+    ],
+    "ui_metrics": [
+      "Conversation Relevancy"
+    ]
+  }
+}

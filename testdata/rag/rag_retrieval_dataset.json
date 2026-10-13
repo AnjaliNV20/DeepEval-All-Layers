@@ -1,0 +1,47 @@
+[
+ {
+    "id": "RAG001",
+    "rag_capability": "Contextual Relevancy",
+    "use_case": "Search & discover",
+    "question": "What iPhone 16 models are available in the store?",
+    "expected_flow": [
+      "document",
+      "vector_db",
+      "llm"
+    ],
+    "expected_output": "The store offers iPhone 16, iPhone 16 Plus, iPhone 16 Pro, and iPhone 16 Pro Max.",
+    "metrics": [
+      "contextual_relevancy"
+    ]
+  },
+  {
+    "id": "RAG002",
+    "rag_capability": "Context Precision",
+    "use_case": "Compare & decide",
+    "question": "What colors are available for the iPhone 16?",
+    "expected_flow": [
+      "document",
+      "vector_db",
+      "llm"
+    ],
+    "expected_output": "The iPhone 16 is available in Black, White, Pink, Teal, and Ultramarine.",
+    "metrics": [
+      "contextual_precision"
+    ]
+  },
+  {
+    "id": "RAG003",
+    "rag_capability": "Context Recall",
+    "use_case": "Place the order",
+    "question": "What information is required to place an order?",
+    "expected_flow": [
+      "document",
+      "vector_db",
+      "llm"
+    ],
+    "expected_output": "To place an order, the customer needs to provide a saved or valid delivery address and select a supported payment method.",
+    "metrics": [
+      "contextual_recall"
+    ]
+  }
+]

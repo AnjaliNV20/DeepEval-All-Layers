@@ -1,0 +1,42 @@
+# Virtual Environment
+myenv314/
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables and secrets (never commit these)
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# Test reports
+reports/
+allure-results/
+allure-report/
+
+# DeepEval local run cache
+.deepeval/
+
+# Chroma / Vector DB
+chroma_db/
+*.db
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+
+# Python cache
+.pytest_cache/

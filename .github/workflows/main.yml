@@ -1,0 +1,53 @@
+
+name: DeepEval RAG Evaluation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deepeval-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Start Ollama
+        run: |
+          ollama serve > ollama.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://localhost:11434/api/tags; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://localhost:11434/api/tags
+
+      - name: Pull Ollama Models
+        run: |
+          ollama pull qwen2.5:7b
+          ollama pull qwen2.5:3b
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run DeepEval Tests
+        env:
+          OLLAMA_MODEL: qwen2.5:7b
+          OLLAMA_BASE_URL: http://localhost:11434
+        run: pytest -v
