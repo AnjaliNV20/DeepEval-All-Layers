@@ -4,13 +4,13 @@ import ollama
 import pytest
 from deepeval.test_case import LLMTestCase
 
-from metrics import (
-    build_custom_metric_suite,
+from single_turn_ui_llm.metrics.llm_metrics import (
     build_llm_metric_suite,
     build_safety_metric_suite,
+    build_custom_metric_suite,
 )
-from config.models import get_answer_model_name, get_judge_model
-from utils.testcase_loader import get_test_case
+from model_verify.model import get_answer_model_name, get_judge_model
+from single_turn_ui_llm.testcases.loader import get_test_case
 
 
 TEST_CASE_IDS = [
@@ -30,26 +30,7 @@ TEST_CASE_IDS = [
 ]
 
 SAFETY_TEST_CASE_IDS = [
-    "TC_SC1_SAFETY_01",
-    "TC_SC1_SAFETY_02",
-    "TC_SC1_SAFETY_03",
-    "TC_SC1_SAFETY_04",
-    "TC_SC1_SAFETY_05",
-    "TC_SC1_SAFETY_06",
-    "TC_SC1_SAFETY_07",
-    "TC_SC1_SAFETY_08",
-    "TC_SC1_SAFETY_09",
-    "TC_SC1_SAFETY_10",
-    "TC_SC1_SAFETY_11",
-    "TC_SC1_SAFETY_12",
-    "TC_SC1_SAFETY_13",
-    "TC_SC1_SAFETY_14",
-    "TC_SC1_SAFETY_15",
-    "TC_SC1_SAFETY_16",
-    "TC_SC1_SAFETY_17",
-    "TC_SC1_SAFETY_18",
-    "TC_SC1_SAFETY_19",
-    "TC_SC1_SAFETY_20",
+    f"TC_SC1_SAFETY_{i:02d}" for i in range(1, 21)
 ]
 
 CUSTOM_METRIC_TEST_CASE_IDS = [
@@ -59,202 +40,101 @@ CUSTOM_METRIC_TEST_CASE_IDS = [
 ]
 
 
-@pytest.mark.parametrize("testcase_id", TEST_CASE_IDS)
-def test_llm_metrics(testcase_id):
-    testcase = get_test_case("single_turn_ui_llm", testcase_id)
-
-    allure.dynamic.title(f"{testcase_id} - LLM evaluation")
-
-    prompt = testcase["prompt"]
-
-    actual_output = ollama.chat(
+def get_llm_response(prompt):
+    response = ollama.chat(
         model=get_answer_model_name(),
         messages=[{"role": "user", "content": prompt}],
         options={"temperature": 0.1},
-    ).message.content
-
-    test_case = LLMTestCase(
-        input=prompt,
-        actual_output=actual_output,
-        expected_output=testcase.get("expected_response"),
-        context=[
-            testcase.get("scenario", ""),
-            testcase.get("expected_response", ""),
-        ],
-        retrieval_context=[
-            testcase.get("expected_response") or prompt
-        ],
     )
-
-    judge_model = get_judge_model()
-
-    results = []
-
-    for metric in build_llm_metric_suite(
-        testcase,
-        model=judge_model,
-    ):
-        metric.measure(test_case)
-
-        metric_name = getattr(metric, "name", metric.__class__.__name__)
-        score = getattr(metric, "score", None)
-        threshold = getattr(metric, "threshold", None)
-        status = "PASS" if getattr(metric, "success", score is not None and threshold is not None and score >= threshold) else "FAIL"
-
-        results.append((metric_name, score, threshold, status))
-
-    print(f"\n{testcase_id}")
-    print("LLM Response:")
-    print(actual_output)
-
-    for name, score, threshold, status in results:
-        print(f"{name}: Score={score}, Threshold={threshold}, {status}")
-
-    allure.attach(
-        prompt,
-        name="Prompt",
-        attachment_type=allure.attachment_type.TEXT,
-    )
-
-    allure.attach(
-        actual_output,
-        name="Actual LLM Response",
-        attachment_type=allure.attachment_type.TEXT,
-    )
-
-    for name, score, threshold, status in results:
-        allure.attach(
-            f"{name}: Score={score}, Threshold={threshold}, {status}",
-            name=name,
-            attachment_type=allure.attachment_type.TEXT,
-        )
-
-    assert actual_output.strip()
+    return response.message.content
 
 
-@pytest.mark.parametrize("testcase_id", SAFETY_TEST_CASE_IDS)
-def test_safety_metrics(testcase_id):
-    testcase = get_test_case("single_turn_ui_llm", testcase_id)
-
-    allure.dynamic.title(f"{testcase_id} - Safety evaluation")
-
+def create_test_case(testcase, actual_output, is_custom):
     prompt = testcase["prompt"]
+    expected = testcase.get("expected_response")
 
-    actual_output = ollama.chat(
-        model=get_answer_model_name(),
-        messages=[{"role": "user", "content": prompt}],
-        options={"temperature": 0.1},
-    ).message.content
-
-    test_case = LLMTestCase(
-        input=prompt,
-        actual_output=actual_output,
-        expected_output=testcase.get("expected_response"),
-        context=[
-            testcase.get("scenario", ""),
-            testcase.get("expected_response", ""),
-        ],
-        retrieval_context=[
-            testcase.get("expected_response") or prompt
-        ],
-    )
-
-    judge_model = get_judge_model()
-
-    results = []
-
-    for metric in build_safety_metric_suite(
-        testcase,
-        model=judge_model,
-    ):
-        metric.measure(test_case)
-
-        metric_name = getattr(metric, "name", metric.__class__.__name__)
-        score = getattr(metric, "score", None)
-        threshold = getattr(metric, "threshold", None)
-        status = "PASS" if getattr(metric, "success", score is not None and threshold is not None and score >= threshold) else "FAIL"
-
-        results.append((metric_name, score, threshold, status))
-
-    print(f"\n{testcase_id}")
-    print("LLM Response:")
-    print(actual_output)
-
-    for name, score, threshold, status in results:
-        print(f"{name}: Score={score}, Threshold={threshold}, {status}")
-
-    allure.attach(
-        prompt,
-        name="Prompt",
-        attachment_type=allure.attachment_type.TEXT,
-    )
-
-    allure.attach(
-        actual_output,
-        name="Actual LLM Response",
-        attachment_type=allure.attachment_type.TEXT,
-    )
-
-    for name, score, threshold, status in results:
-        allure.attach(
-            f"{name}: Score={score}, Threshold={threshold}, {status}",
-            name=name,
-            attachment_type=allure.attachment_type.TEXT,
-        )
-
-    assert actual_output.strip()
-
-
-@pytest.mark.parametrize("testcase_id", CUSTOM_METRIC_TEST_CASE_IDS)
-def test_custom_metrics(testcase_id):
-    testcase = get_test_case("single_turn_ui_llm", testcase_id)
-
-    allure.dynamic.title(f"{testcase_id} - Custom G-Eval")
-
-    prompt = testcase["prompt"]
-    actual_output = ollama.chat(
-        model=get_answer_model_name(),
-        messages=[{"role": "user", "content": prompt}],
-        options={"temperature": 0.1},
-    ).message.content
-
-    expected_response = testcase.get("expected_response")
-    test_case = LLMTestCase(
-        input=prompt,
-        actual_output=actual_output,
-        expected_output=expected_response,
-        context=[
+    context = (
+        [
             testcase.get("scenario", ""),
             testcase.get("policy_rules", ""),
             testcase.get("required_disclaimer", ""),
-            expected_response or "",
-        ],
-        retrieval_context=[expected_response or prompt],
+            expected or "",
+        ]
+        if is_custom
+        else [
+            testcase.get("scenario", ""),
+            expected or "",
+        ]
     )
 
-    judge_model = get_judge_model()
+    return LLMTestCase(
+        input=prompt,
+        actual_output=actual_output,
+        expected_output=expected,
+        context=context,
+        retrieval_context=[expected or prompt],
+    )
+
+
+def report_metrics(metrics, test_case, is_custom):
     results = []
 
-    for metric in build_custom_metric_suite(testcase, model=judge_model):
+    for metric in metrics:
         metric.measure(test_case)
 
-        metric_name = getattr(metric, "name", metric.__class__.__name__)
+        name = getattr(metric, "name", metric.__class__.__name__)
         score = getattr(metric, "score", None)
         threshold = getattr(metric, "threshold", None)
+
         success = getattr(metric, "success", None)
+
         if success is None:
-            success = score is not None and threshold is not None and score >= threshold
+            success = (
+                score is not None
+                and threshold is not None
+                and score >= threshold
+            )
+
         status = "PASS" if success else "FAIL"
-        reason = getattr(metric, "reason", None) or "No evaluation reason returned."
-        results.append((metric_name, score, threshold, status, reason))
+        reason = getattr(metric, "reason", None) or (
+            "No evaluation reason returned."
+        )
 
-    print(f"\n{testcase_id}")
-    print("LLM Response:")
-    print(actual_output)
+        print(
+            f"{name}: Score={score}, "
+            f"Threshold={threshold}, Status={status}"
+        )
 
-    for name, score, threshold, status, reason in results:
-        print(f"{name}: Score={score}, Threshold={threshold}, {status}")
-        print(f"Reason: {reason}")
+        details = (
+            f"Score: {score}\n"
+            f"Threshold: {threshold}\n"
+            f"Status: {status}"
+        )
+
+        if is_custom:
+            print(f"Reason: {reason}")
+            details += f"\nReason: {reason}"
+
+        allure.attach(
+            details,
+            name=name,
+            attachment_type=allure.attachment_type.TEXT,
+        )
+
+        results.append((name, score, threshold, status))
+
+    return results
+
+
+def run_evaluation(testcase_id, metric_builder, evaluation_type):
+    testcase = get_test_case(testcase_id)
+    prompt = testcase["prompt"]
+    is_custom = evaluation_type == "Custom G-Eval"
+
+    allure.dynamic.title(f"{testcase_id} - {evaluation_type}")
+
+    actual_output = get_llm_response(prompt)
+    test_case = create_test_case(testcase, actual_output, is_custom)
 
     allure.attach(
         prompt,
@@ -267,33 +147,54 @@ def test_custom_metrics(testcase_id):
         attachment_type=allure.attachment_type.TEXT,
     )
 
-    for name, score, threshold, status, reason in results:
-        allure.attach(
-            f"Score={score}, Threshold={threshold}, Status={status}\nReason: {reason}",
-            name=f"{name} result",
-            attachment_type=allure.attachment_type.TEXT,
-        )
+    print(f"\nTest Case: {testcase_id}")
+    print("LLM Response:")
+    print(actual_output)
+
+    metrics = metric_builder(testcase, model=get_judge_model())
+    results = report_metrics(metrics, test_case, is_custom)
 
     required_disclaimer = testcase.get("required_disclaimer")
-    if required_disclaimer:
+
+    if is_custom and required_disclaimer:
         disclaimer_present = required_disclaimer in actual_output
-        disclaimer_status = "PASS" if disclaimer_present else "FAIL"
-        print(f"Exact disclaimer check: {disclaimer_status}")
+        status = "PASS" if disclaimer_present else "FAIL"
+
+        print(f"Exact disclaimer check: {status}")
+
         allure.attach(
-            f"Required phrase: {required_disclaimer}\nStatus: {disclaimer_status}",
+            f"Required phrase: {required_disclaimer}\nStatus: {status}",
             name="Disclaimer exact-text check",
             attachment_type=allure.attachment_type.TEXT,
         )
 
-    assert actual_output.strip()
-    failed_metrics = [
-        f"{name}: score={score}, threshold={threshold}"
-        for name, score, threshold, status, _ in results
-        if status != "PASS"
-    ]
-    assert not failed_metrics, "Custom metric failures: " + "; ".join(failed_metrics)
-    if required_disclaimer:
-        assert required_disclaimer in actual_output, (
-            f"Required disclaimer is missing: {required_disclaimer}"
-        )
+    assert actual_output.strip(), "LLM response is empty"
 
+    if is_custom:
+        failures = [
+            f"{name}: score={score}, threshold={threshold}"
+            for name, score, threshold, status in results
+            if status != "PASS"
+        ]
+
+        assert not failures, "Custom metric failures: " + "; ".join(failures)
+
+        if required_disclaimer:
+            assert required_disclaimer in actual_output, (
+                f"Required disclaimer is missing: {required_disclaimer}"
+            )
+
+
+@pytest.mark.parametrize("testcase_id", TEST_CASE_IDS)
+def test_llm_metrics(testcase_id):
+    run_evaluation(testcase_id, build_llm_metric_suite, "LLM evaluation")
+
+
+@pytest.mark.parametrize("testcase_id", SAFETY_TEST_CASE_IDS)
+def test_safety_metrics(testcase_id):
+    run_evaluation(testcase_id, build_safety_metric_suite, "Safety evaluation")
+
+
+@pytest.mark.parametrize("testcase_id", CUSTOM_METRIC_TEST_CASE_IDS)
+def test_custom_metrics(testcase_id):
+    run_evaluation(testcase_id, build_custom_metric_suite, "Custom G-Eval")

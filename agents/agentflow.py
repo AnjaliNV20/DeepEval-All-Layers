@@ -2,7 +2,7 @@ import json
 
 import ollama
 
-from config.settings import ANSWER_MODEL_NAME
+from model_verify.model import ANSWER_MODEL_NAME
 
 
 def search_iphone_catalog(query):
