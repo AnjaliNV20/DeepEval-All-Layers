@@ -20,6 +20,15 @@ def get_evaluation_model():
     )
 
 
+def get_answer_model():
+    """Answer-generation model for UI tests."""
+    return OllamaModel(
+        model=ANSWER_MODEL_NAME,
+        base_url=OLLAMA_BASE_URL,
+        temperature=TEMPERATURE,
+    )
+
+
 def get_answer_model_name():
     """Name of the model that answers in the single-turn, multi-turn and agentic tests."""
     return ANSWER_MODEL_NAME
