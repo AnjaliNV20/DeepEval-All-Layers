@@ -4,9 +4,16 @@ from deepeval.metrics import PlanAdherenceMetric
 from deepeval.tracing import observe, update_current_span
 from deepeval.tracing.tracing import current_span_context, trace_manager
 
-from agentic_testing.testcases.loader import get_test_case
-from agentic_testing.tools.agentflow import run_agentflow
-from model_verify.model import get_judge_model
+from agents.agentflow import run_agentflow
+from config.models import get_judge_model
+from utils.testcase_loader import get_test_case
+
+
+def get_plan_adherence_metric(model):
+    return PlanAdherenceMetric(
+        threshold=0.5,
+        model=model
+    )
 
 
 @observe(type="agent")
@@ -59,7 +66,7 @@ def run_traced_agentflow(prompt):
 
 def run_plan_adherence():
 
-    case = get_test_case("TC_SC3_PLAN_ADHERENCE")
+    case = get_test_case("agentic_testing", "TC_SC3_PLAN_ADHERENCE")
     question = case["prompt"]
     execution_prompt = (
         f"{question}\n\n"
@@ -72,10 +79,7 @@ def run_plan_adherence():
 
     answer, tools_used, trace, test_case = run_traced_agentflow(execution_prompt)
 
-    metric = PlanAdherenceMetric(
-        threshold=0.5,
-        model=get_judge_model()
-    )
+    metric = get_plan_adherence_metric(get_judge_model())
 
     metric.measure(test_case)
 
@@ -90,4 +94,3 @@ def run_plan_adherence():
     print("==============================")
 
     return metric.score
-

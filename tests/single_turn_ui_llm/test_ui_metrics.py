@@ -7,9 +7,9 @@ from deepeval.test_case import (
     Turn,
 )
 
-from single_turn_ui_llm.metrics.ui_metrics import build_ui_metric_suite
-from model_verify.model import get_answer_model_name, get_judge_model
-from single_turn_ui_llm.testcases.loader import get_test_case
+from metrics.single_turn_ui_llm.all_ui_metrix import build_ui_metric_suite
+from config.models import get_answer_model_name, get_judge_model
+from utils.testcase_loader import get_test_case
 
 
 TEST_CASE_IDS = [
@@ -20,7 +20,7 @@ TEST_CASE_IDS = [
 
 @pytest.mark.parametrize("testcase_id", TEST_CASE_IDS)
 def test_ui_metrics(testcase_id):
-    testcase = get_test_case(testcase_id)
+    testcase = get_test_case("single_turn_ui_llm", testcase_id)
 
     allure.dynamic.title(f"{testcase_id} - UI evaluation")
 

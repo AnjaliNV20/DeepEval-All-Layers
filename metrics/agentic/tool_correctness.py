@@ -1,9 +1,17 @@
 from deepeval.test_case import LLMTestCase, ToolCall, ToolCallParams
 from deepeval.metrics import ToolCorrectnessMetric
 
-from agentic_testing.testcases.loader import get_test_case
-from agentic_testing.tools.agentflow import run_agentflow
-from model_verify.model import get_judge_model
+from agents.agentflow import run_agentflow
+from config.models import get_judge_model
+from utils.testcase_loader import get_test_case
+
+
+def get_tool_correctness_metric(model):
+    return ToolCorrectnessMetric(
+        threshold=0.5,
+        evaluation_params=[ToolCallParams.INPUT_PARAMETERS],
+        model=model
+    )
 
 
 def build_tool_calls(trace):
@@ -23,7 +31,7 @@ def build_tool_calls(trace):
 
 def run_tool_correctness():
 
-    testcase = get_test_case("TC_SC3_TOOL_CORRECTNESS")
+    testcase = get_test_case("agentic_testing", "TC_SC3_TOOL_CORRECTNESS")
     prompt = testcase["prompt"]
 
     answer, tools_used, trace = run_agentflow(prompt)
@@ -45,11 +53,7 @@ def run_tool_correctness():
         expected_tools=expected_tools
     )
 
-    metric = ToolCorrectnessMetric(
-        threshold=0.5,
-        evaluation_params=[ToolCallParams.INPUT_PARAMETERS],
-        model=get_judge_model()
-    )
+    metric = get_tool_correctness_metric(get_judge_model())
 
     print(
         "Actual tools_called:",

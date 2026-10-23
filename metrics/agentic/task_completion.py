@@ -3,9 +3,16 @@ from deepeval.metrics import TaskCompletionMetric
 from deepeval.tracing import observe, update_current_span
 from deepeval.tracing.tracing import current_span_context, trace_manager
 
-from agentic_testing.testcases.loader import get_test_case
-from agentic_testing.tools.agentflow import run_agentflow
-from model_verify.model import get_judge_model
+from agents.agentflow import run_agentflow
+from config.models import get_judge_model
+from utils.testcase_loader import get_test_case
+
+
+def get_task_completion_metric(model):
+    return TaskCompletionMetric(
+        threshold=0.5,
+        model=model
+    )
 
 
 @observe(type="agent")
@@ -40,15 +47,12 @@ def run_traced_agentflow(prompt):
 
 def run_task_completion():
 
-    testcase = get_test_case("TC_SC3_TOOL_CORRECTNESS")
+    testcase = get_test_case("agentic_testing", "TC_SC3_TOOL_CORRECTNESS")
     prompt = testcase["prompt"]
 
     answer, tools_used, trace, test_case = run_traced_agentflow(prompt)
 
-    metric = TaskCompletionMetric(
-        threshold=0.5,
-        model=get_judge_model()
-    )
+    metric = get_task_completion_metric(get_judge_model())
 
     metric.measure(test_case)
 
